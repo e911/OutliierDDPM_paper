@@ -61,9 +61,9 @@ def load_train_data(batch_size):
     class_samples = {0: 6000, 1: 6000, 2: 50, 3: 100, 4: 5500, 5: 5500, 6: 5500, 7: 5500, 8: 6000, 9: 6000}
     train_dataset = create_imbalanced_dataset(train_dataset, class_samples)
     class_counts = {label: sum(1 for x in train_dataset['label'] if x == label) for label in range(10)}
-    print("Class counts in the imbalanced dataset:")
+    logger.info("Class counts in the imbalanced dataset:")
     for label, count in class_counts.items():
-        print(f"Class {label}: {count}")
+        logger.info(f"Class {label}: {count}")
 
     transformed_dataset = train_dataset.with_transform(transforms_dataset)
     train_loader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=False)
@@ -115,7 +115,7 @@ def train():
 
     # Training loop
     for epoch in range(epochs):
-        print(f"Epoch {epoch + 1}/{epochs}")
+        logger.info(f"Epoch {epoch + 1}/{epochs}")
         epoch_loss = 0  # To accumulate epoch loss
 
         for step, batch in enumerate(dataloader):
@@ -133,7 +133,7 @@ def train():
 
             # Print loss at every 100 steps
             if step % 100 == 0:
-                print(f"Step {step}: Loss = {loss.item():.4f}")
+                logger.info(f"Step {step}: Loss = {loss.item():.4f}")
 
             # Backpropagation
             loss.backward()
@@ -153,7 +153,7 @@ def train():
 
         # Calculate and print average epoch loss
         avg_epoch_loss = epoch_loss / len(dataloader)
-        print(f"Average Loss for Epoch {epoch + 1}: {avg_epoch_loss:.4f}")
+        logger.info(f"Average Loss for Epoch {epoch + 1}: {avg_epoch_loss:.4f}")
 
         # Save model checkpoint after each epoch
         checkpoint_path = checkpoint_folder / f"model_epoch_{epoch + 1}.pth"
@@ -163,7 +163,7 @@ def train():
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': avg_epoch_loss,
         }, checkpoint_path)
-        print(f"Checkpoint saved at {checkpoint_path}")
+        logger.info(f"Checkpoint saved at {checkpoint_path}")
 
 def load_model(checkpoint_path, image_size=28, channels=1):
     """
@@ -192,7 +192,7 @@ def load_model(checkpoint_path, image_size=28, channels=1):
 
     # Load the state dictionaries
     model.load_state_dict(checkpoint['model_state_dict'])
-    print(f"Loaded model from checkpoint: {checkpoint_path}")
+    logger.info(f"Loaded model from checkpoint: {checkpoint_path}")
 
     return model
 
