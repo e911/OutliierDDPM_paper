@@ -1,12 +1,14 @@
 import os
 
 import numpy as np
+import torch
 from matplotlib import pyplot as plt
 
-from diffuseNew.utils.sampling import sample
-
+from diffuseNew.utils.sampling import sample, denoise_image_loop, q_sample
 
 import logging
+
+from diffuseNew.utils.transforms import transform
 
 logging.basicConfig(level=logging.INFO,  # Set the logging level
                     format='%(asctime)s - %(levelname)s - %(message)s',  # Log format
@@ -72,10 +74,10 @@ def visualize_reconstruction(original_image, noisy_image, reconstructed_image, i
 
 
 def generate_sample(model, image_size, batch_size, channels, timesteps):
-    training_dir = f"./training_steps"
+    training_dir = f"./training_sample_steps"
     if not os.path.exists(training_dir):
         os.makedirs(training_dir)
-        logger.info(f"Created training directory at {training_dir}")
+        logger.info(f"Created sample directory at {training_dir}")
 
     samples = sample(model, image_size=image_size, batch_size=batch_size, channels=channels)
 
@@ -95,4 +97,35 @@ def generate_sample(model, image_size, batch_size, channels, timesteps):
     # Display the entire row of images
     plt.tight_layout(pad=0)
     plt.savefig(f'{training_dir}/train.png')# Ensure no padding around the images
+    plt.show()
+
+
+def plot_denoise_steps(model, image, timesteps=1000, image_size=28, channels=1, steps=50):
+    image_t = transform(image['image']).unsqueeze(0)
+    training_dir = f"./denosing_steps"
+    if not os.path.exists(training_dir):
+        os.makedirs(training_dir)
+        logger.info(f"Created sample directory at {training_dir}")
+    t = torch.tensor([timesteps - 1])
+    noisy_image = q_sample(image_t, t)
+    samples = denoise_image_loop(model, noisy_image, timesteps)
+
+    fig, axes = plt.subplots(1, int(timesteps / steps) + 1, figsize=(int(timesteps / steps) * 2 + 1, 2))
+
+    # Remove spaces between the subplots
+    plt.subplots_adjust(wspace=0, hspace=0)
+
+    # Loop through each timestep and plot the corresponding image
+    axes[0].imshow(image_t.reshape(image_size, image_size, channels), cmap="gray")
+    axes[0].axis('off')  # Remove axis for a cleaner look
+
+    for i in range(timesteps):
+        if i % steps == 0:
+            step = int(i / steps)
+            axes[step + 1].imshow(samples[i].reshape(image_size, image_size, channels), cmap="gray")
+            axes[step + 1].axis('off')  # Remove axis for a cleaner look
+
+    # Display the entire row of images
+    plt.tight_layout(pad=0)
+    plt.savefig(f'{training_dir}/train.png')  # Ensure no padding around the images
     plt.show()

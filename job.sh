@@ -20,4 +20,4 @@
 conda activate diffuse  # or `conda activate diffuse` depending on your conda setup
 
 # Run the Python script with command-line arguments
-python -m diffuseNew.main --mode train
+python -m diffuseNew.main --mode train --epochs 10 --channels 1 --batch_size 64 --learning_rate 0.0008 --ddpm_timesteps 1000 --n 2 ==steps 50

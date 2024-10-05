@@ -3,8 +3,7 @@ from collections import defaultdict
 import torch
 import torch.nn.functional as F
 
-from diffuseNew.utils.sampling import denoise_image
-from diffuseNew.utils.transforms import q_sample
+from diffuseNew.utils.sampling import denoise_image, q_sample
 
 
 def p_losses(denoise_model, x_start, t, noise=None, loss_type="l1"):
@@ -44,7 +43,7 @@ def reconstruction_error_by_class(model, test_dataloader, device):
         timestep = torch.tensor([150] * batch_size).to(device)
 
         # Add noise to the images at the given timestep
-        noisy_images, _ = q_sample(images, timestep)
+        noisy_images = q_sample(images, timestep)
 
         # Denoise the images using the diffusion model
         reconstructed_images = denoise_image(model, noisy_images, timesteps=300)

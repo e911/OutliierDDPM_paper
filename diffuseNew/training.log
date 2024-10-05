@@ -58,3 +58,15 @@
 2024-10-05 13:46:26,273 - INFO - Running with the following configuration:
 2024-10-05 13:46:26,274 - INFO - Mode: train
 2024-10-05 13:46:26,274 - INFO - mode: train
+2024-10-05 17:29:28,639 - INFO - PyTorch version 2.2.2 available.
+2024-10-05 17:29:28,641 - INFO - TensorFlow version 2.15.0 available.
+2024-10-05 17:29:29,054 - INFO - Running with the following configuration:
+2024-10-05 17:29:29,054 - INFO - Mode: train
+2024-10-05 17:29:29,054 - INFO - mode: train
+2024-10-05 17:29:29,054 - INFO - device: cuda
+2024-10-05 17:29:29,054 - INFO - epochs: 20
+2024-10-05 17:29:29,055 - INFO - channels: 1
+2024-10-05 17:29:29,055 - INFO - batch_size: 64
+2024-10-05 17:29:29,055 - INFO - ddpm_timesteps: 1000
+2024-10-05 17:29:29,055 - INFO - n: 1
+2024-10-05 17:29:29,055 - INFO - steps: 1

@@ -10,25 +10,20 @@ import argparse
 import os
 # Commented out IPython magic to ensure Python compatibility.
 
-from inspect import isfunction
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-import requests
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
-import torch.nn.functional as F
 
 from diffuseNew.models.loss import p_losses, reconstruction_error_by_class
 from diffuseNew.models.unet import *
-from diffuseNew.utils.lib import num_to_groups
-from diffuseNew.utils.sampling import sample
+from diffuseNew.utils.sampling import sample, get_noisy_image
 from diffuseNew.utils.schedule import *
-from diffuseNew.utils.transforms import get_noisy_image, transform, transform_dataset, transforms_dataset
-from diffuseNew.utils.visualization import plot
-from datasets import load_dataset, Image, concatenate_datasets
+from diffuseNew.utils.transforms import transform, transform_dataset, transforms_dataset
+from diffuseNew.utils.visualization import plot, plot_denoise_steps
+from datasets import load_dataset, concatenate_datasets
 
 torch.manual_seed(0)
 
@@ -43,6 +38,15 @@ logging.basicConfig(level=logging.INFO,  # Set the logging level
                     ])
 
 logger = logging.getLogger(__name__)
+
+
+def num_to_groups(num, divisor):
+    groups = num // divisor
+    remainder = num % divisor
+    arr = [divisor] * groups
+    if remainder > 0:
+        arr.append(remainder)
+    return arr
 
 def create_imbalanced_dataset(dataset, class_samples):
     subsets = []
@@ -72,19 +76,26 @@ def load_train_data(batch_size):
 
 def load_test_data(batch_size):
     test_dataset = load_dataset("mnist", split='test')
-    test_dataset.with_transform(transform_dataset)
+    # class_samples = {0: 6000, 1: 6000, 2: 50, 3: 100, 4: 5500, 5: 5500, 6: 5500, 7: 5500, 8: 6000, 9: 6000}
+    # test_dataset = create_imbalanced_dataset(test_dataset, class_samples)
+    # class_counts = {label: sum(1 for x in test_dataset['label'] if x == label) for label in range(10)}
+    # logger.info("Class counts in the imbalanced dataset:")
+    # for label, count in class_counts.items():
+    #     logger.info(f"Class {label}: {count}")
 
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    transformed_dataset = test_dataset.with_transform(transforms_dataset)
+
+    test_loader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=False)
     return test_loader
 
-def train():
+def train(config):
 
     # Setup parameters
     image_size = 28
-    channels = 1
-    batch_size = 128
-    timesteps = 1000  # Number of diffusion timesteps
-    epochs = 15  # Number of training epochs
+    channels = config['channels']
+    batch_size = config['batch_size']
+    timesteps = config['timesteps']  # Number of diffusion timesteps
+    epochs = config['epochs']  # Number of training epochs
 
     # Create a DataLoader for training data
     dataloader = load_train_data(batch_size)
@@ -111,7 +122,7 @@ def train():
     model.to(device)
 
     # Set up the optimizer
-    optimizer = Adam(model.parameters(), lr=1e-3)
+    optimizer = Adam(model.parameters(), lr=config['learning_rate'])
 
     # Training loop
     for epoch in range(epochs):
@@ -196,10 +207,14 @@ def load_model(checkpoint_path, image_size=28, channels=1):
 
     return model
 
-def eval_recon_loss(epoch, image_size, channels):
+def eval_recon_loss(config):
+    image_size = 28
+    channels = config['channels']
+    batch_size = config['batch_size']
+    epoch = config['epochs']
     checkpoint_folder = Path("./checkpoints")
     checkpoint_path = checkpoint_folder / f"model_epoch_{epoch + 1}.pth"
-    test_dataloader = load_test_data(batch_size=128)
+    test_dataloader = load_test_data(batch_size=batch_size)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = load_model(checkpoint_path, image_size, channels)
     reconstruction_error_by_class(model, test_dataloader, device=device)
@@ -231,19 +246,45 @@ def plot_noisy_image_timesteps(image, step=15, timesteps=300):
     for timestep in range(0, timesteps + 1, step):
         plot([get_noisy_image(x_start, torch.tensor([timestep]))], x_start, save_path=f'{checkpoint_dir}/noisy_image_{timestep}.png')
 
+def per_images(n):
+  image = []
+  test_dataloader = load_dataset("mnist", split='test')
+  for i in range(10):
+    count = 0
+    for each in test_dataloader:
+      if each['label'] == i:
+        image.append(each)
+        count = count + 1
+      if count == n:
+          break
+  return image
 
+def noise_denois_steps(config):
+    image_size = 28
+    channels = config['channels']
+    timesteps = config['timesteps']  # Number of diffusion timesteps
+    epoch = config['epochs']
+    steps = config['steps']
+    images = per_images(config['n'])
+    checkpoint_folder = Path("./checkpoints")
+    checkpoint_path = checkpoint_folder / f"model_epoch_{epoch}.pth"
+    model = load_model(checkpoint_path, image_size, channels)
+    for each in images:
+        plot_denoise_steps(model, each, timesteps=timesteps, image_size=image_size, channels=channels, steps=steps)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Training Configuration for Diffusion Model')
     parser.add_argument('--mode', type=str, default='train', help='Train or Eval')
-    # parser.add_argument('--device', type=str, default='cuda', help='Device to use for training')
-    # parser.add_argument('--epochs', type=int, default=20, help='Number of training epochs')
-    # parser.add_argument('--batch_size', type=int, default=64, help='Training batch size')
-    # parser.add_argument('--learning_rate', type=float, default=0.0004, help='Optimizer learning rate')
-    # parser.add_argument('--ddpm_timesteps', type=int, default=1000, help='Number of DDPM timesteps')
+    parser.add_argument('--device', type=str, default='cuda', help='Device to use for training')
+    parser.add_argument('--epochs', type=int, default=20, help='Number of training epochs')
+    parser.add_argument('--channels', type=int, default=1, help='Number of channels 1/3')
+    parser.add_argument('--batch_size', type=int, default=64, help='Training batch size')
+    parser.add_argument('--learning_rate', type=float, default=0.0004, help='Optimizer learning rate')
+    parser.add_argument('--ddpm_timesteps', type=int, default=1000, help='Number of DDPM timesteps')
     # parser.add_argument('--cosine_warmup_steps', type=int, default=500, help='Warmup steps for learning rate scheduler')
     # parser.add_argument('--cosine_total_training_steps', type=int, default=10000, help='Total training steps for learning rate scheduler')
-    # parser.add_argument('--n', type=int, default=1, help='Number of images per class')
+    parser.add_argument('--n', type=int, default=1, help='Number of images per class')
+    parser.add_argument('--steps', type=int, default=1, help='Skip steps in printing image')
     args = parser.parse_args()
     return args
 
@@ -254,31 +295,29 @@ if __name__ == '__main__':
     logger.info(f"Mode: {args.mode}")
     for arg, value in vars(args).items():
         logger.info(f"{arg}: {value}")
-    # config = {
-    #     'device': args.device,
-    #     'epochs': args.epochs,
-    #     'batch_size': args.batch_size,
+    config = {
+        'device': args.device,
+        'epochs': args.epochs,
+        'channels': args.channels,
+        'batch_size': args.batch_size,
+        'learning_rate': args.learning_rate,
     #     'class_counts': {0: 5000, 1:10, 2: 4400, 3: 4000, 4: 4800, 5: 4400, 6: 4200, 7: 4000, 8: 4000, 9: 10},
-    #     'ddpm_scheduler_timestep': args.ddpm_timesteps,
+        'ddpm_scheduler_timestep': args.ddpm_timesteps,
     #     'cosine_warmup_steps': args.cosine_warmup_steps,
     #     'cosine_warmup_training_steps': args.cosine_total_training_steps,
     #     'learning_rate': args.learning_rate,
-    #     'n': args.n
-    # }
+        'n': args.n,
+        'steps': args.steps
+    }
 
     if args.mode == 'train':
-        train()
+        train(config)
     # elif args.mode == 'eval':
     #     eval_recon(config)
     # elif args.mode == 'eval_diff':
     #     eval_noise_denoise(config)
     elif args.mode == 'eval_classwise':
-        image_size = 28
-        channels = 1
-        batch_size = 128
-        timesteps = 1000  # Number of diffusion timesteps
-        epochs = 15
-        eval_recon_loss(image_size, channels, timesteps)
+        eval_recon_loss(config)
     # elif args.mode == 'one':
     #     eval_one(config)
     else:

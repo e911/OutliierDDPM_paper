@@ -4,7 +4,7 @@ from torchvision import transforms
 from diffuseNew.utils.lib import *
 from torchvision.transforms import Compose, Lambda, ToPILImage, Resize, CenterCrop, ToTensor
 
-image_size = 64
+image_size = 28
 
 transform = Compose([
     Resize(image_size),
@@ -36,23 +36,3 @@ def transforms_dataset(examples):
 
    return examples
 
-
-def q_sample(x_start, t, noise=None):
-    if noise is None:
-        noise = torch.randn_like(x_start)
-
-    sqrt_alphas_cumprod_t = extract(sqrt_alphas_cumprod, t, x_start.shape)
-    sqrt_one_minus_alphas_cumprod_t = extract(
-        sqrt_one_minus_alphas_cumprod, t, x_start.shape
-    )
-
-    return sqrt_alphas_cumprod_t * x_start + sqrt_one_minus_alphas_cumprod_t * noise
-
-def get_noisy_image(x_start, t):
-  # add noise
-  x_noisy = q_sample(x_start, t=t)
-
-  # turn back into PIL image
-  noisy_image = reverse_transform(x_noisy.squeeze())
-
-  return noisy_image

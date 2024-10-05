@@ -2,6 +2,14 @@ import torch
 from tqdm import tqdm
 
 from diffuseNew.utils.lib import *
+from diffuseNew.utils.transforms import reverse_transform
+
+
+def extract(a, t, x_shape):
+    batch_size = t.shape[0]
+    out = a.gather(-1, t.cpu())
+    return out.reshape(batch_size, *((1,) * (len(x_shape) - 1))).to(t.device)
+
 
 
 @torch.no_grad()
@@ -64,3 +72,41 @@ def denoise_image(model, noisy_image, timesteps=300):
         img = p_sample(model, img, t, t_index=i)  # Call your sampling function from sampling.py
 
     return img
+
+
+@torch.no_grad()
+def denoise_image_loop(model, noisy_image, timesteps=300):
+    device = next(model.parameters()).device
+
+    noisy_image = noisy_image.to(device)
+    img = noisy_image.clone()
+    # start from pure noise (for each example in the batch)
+    imgs = []
+
+    for i in tqdm(reversed(range(0, timesteps)), desc='sampling loop time step', total=timesteps):
+        t = torch.full((noisy_image.size(0),), i, device=device, dtype=torch.long)
+        img = p_sample(model, img, t, i)
+        imgs.append(img.cpu().numpy())
+    return imgs
+
+
+def q_sample(x_start, t, noise=None):
+    if noise is None:
+        noise = torch.randn_like(x_start)
+
+    sqrt_alphas_cumprod_t = extract(sqrt_alphas_cumprod, t, x_start.shape)
+    sqrt_one_minus_alphas_cumprod_t = extract(
+        sqrt_one_minus_alphas_cumprod, t, x_start.shape
+    )
+
+    return sqrt_alphas_cumprod_t * x_start + sqrt_one_minus_alphas_cumprod_t * noise
+
+
+def get_noisy_image(x_start, t):
+  # add noise
+  x_noisy = q_sample(x_start, t=t)
+
+  # turn back into PIL image
+  noisy_image = reverse_transform(x_noisy.squeeze())
+
+  return noisy_image

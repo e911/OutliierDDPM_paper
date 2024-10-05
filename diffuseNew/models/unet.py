@@ -1,4 +1,6 @@
 # models/unet.py
+from inspect import isfunction
+
 import torch
 from torch import nn, einsum
 from einops import rearrange
@@ -6,8 +8,11 @@ from .layers import Residual, WeightStandardizedConv2d, PreNorm, SinusoidalPosit
 
 from functools import partial
 
-from ..utils.lib import default
 
+def default(val, d):
+    if val:
+        return val
+    return d() if isfunction(d) else d
 
 def Upsample(dim, dim_out=None):
     return nn.Sequential(
