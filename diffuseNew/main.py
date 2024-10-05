@@ -259,7 +259,7 @@ def per_images(n):
           break
   return image
 
-def noise_denois_steps(config):
+def noise_denoise_steps(config):
     image_size = 28
     channels = config['channels']
     timesteps = config['timesteps']  # Number of diffusion timesteps
@@ -314,8 +314,8 @@ if __name__ == '__main__':
         train(config)
     # elif args.mode == 'eval':
     #     eval_recon(config)
-    # elif args.mode == 'eval_diff':
-    #     eval_noise_denoise(config)
+    elif args.mode == 'eval_diff':
+        noise_denoise_steps(config)
     elif args.mode == 'eval_classwise':
         eval_recon_loss(config)
     # elif args.mode == 'one':
