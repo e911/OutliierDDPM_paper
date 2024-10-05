@@ -154,13 +154,13 @@ def train(config):
             epoch_loss += loss.item()
 
             # Save generated images periodically
-            if step != 0 and step % save_and_sample_every == 0:
-                milestone = step // save_and_sample_every
-                batches = num_to_groups(4, batch_size)
-                all_images_list = [sample(model, batch_size=n, channels=channels) for n in batches]
-                all_images = torch.cat(all_images_list, dim=0)
-                all_images = (all_images + 1) * 0.5  # Scale back to [0, 1]
-                save_image(all_images, str(results_folder / f'sample-{epoch}-{milestone}.png'), nrow=6)
+            # if step != 0 and step % save_and_sample_every == 0:
+            #     milestone = step // save_and_sample_every
+            #     batches = num_to_groups(4, batch_size)
+            #     all_images_list = [sample(model, batch_size=n, channels=channels) for n in batches]
+            #     all_images = torch.cat(all_images_list, dim=0)
+            #     all_images = (all_images + 1) * 0.5  # Scale back to [0, 1]
+            #     save_image(all_images, str(results_folder / f'sample-{epoch}-{milestone}.png'), nrow=6)
 
         # Calculate and print average epoch loss
         avg_epoch_loss = epoch_loss / len(dataloader)
