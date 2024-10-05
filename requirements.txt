@@ -8,7 +8,7 @@ tensorflow==2.15.0
 torch==2.2.2
 torchsummary==1.5.1
 torchvision==0.17.2
-tqdm==4.66.1
+tqdm==4.66.3
 argparse~=1.4.0
 diffusers~=0.29.2
 einops~=0.8.0
