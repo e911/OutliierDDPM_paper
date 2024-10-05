@@ -5,6 +5,16 @@ import torch.nn.functional as F
 
 from diffuseNew.utils.sampling import denoise_image, q_sample
 
+import logging
+
+logging.basicConfig(level=logging.INFO,  # Set the logging level
+                    format='%(asctime)s - %(levelname)s - %(message)s',  # Log format
+                    handlers=[
+                        logging.FileHandler("training.log"),  # Log to a file
+                        logging.StreamHandler()  # Also log to the console
+                    ])
+
+logger = logging.getLogger(__name__)
 
 def p_losses(denoise_model, x_start, t, noise=None, loss_type="l1"):
     if noise is None:
@@ -61,9 +71,9 @@ def reconstruction_error_by_class(model, test_dataloader, device):
                                            class_reconstruction_errors.items()}
 
         # Print the results neatly
-        print("Average Reconstruction Error for Each Class each loop:")
+        logger.info("Average Reconstruction Error for Each Class each loop:")
         for label, avg_error in avg_class_reconstruction_errors.items():
-            print(f"Class {label}: {avg_error:.4f}")
+            logger.info(f"Class {label}: {avg_error:.4f}")
 
     # Calculate average reconstruction error for each class
     avg_class_reconstruction_errors = {label: torch.tensor(errors).mean().item()
@@ -71,4 +81,4 @@ def reconstruction_error_by_class(model, test_dataloader, device):
 
     # Print the average reconstruction error for each class
     for label, avg_error in avg_class_reconstruction_errors.items():
-        print(f"Average Reconstruction Error for Class {label}: {avg_error:.4f}")
+        logger.info(f"Average Reconstruction Error for Class {label}: {avg_error:.4f}")

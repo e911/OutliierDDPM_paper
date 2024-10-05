@@ -284,7 +284,7 @@ def parse_arguments():
     # parser.add_argument('--cosine_warmup_steps', type=int, default=500, help='Warmup steps for learning rate scheduler')
     # parser.add_argument('--cosine_total_training_steps', type=int, default=10000, help='Total training steps for learning rate scheduler')
     parser.add_argument('--n', type=int, default=1, help='Number of images per class')
-    parser.add_argument('--steps', type=int, default=1, help='Skip steps in printing image')
+    parser.add_argument('--steps', type=int, default=1, help='Skip steps in saving image')
     args = parser.parse_args()
     return args
 
