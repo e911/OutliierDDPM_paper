@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from diffuseNew.utils.schedule import linear_beta_schedule, cosine_beta_schedule
 from inspect import isfunction
 
-timesteps = 300
+timesteps = 1000
 # define beta schedule
 betas = cosine_beta_schedule(timesteps=timesteps)
 

@@ -361,7 +361,7 @@ def sigmoid_beta_schedule(timesteps):
     betas = torch.linspace(-6, 6, timesteps)
     return torch.sigmoid(betas) * (beta_end - beta_start) + beta_start
 
-timesteps = 300
+timesteps = 1000
 
 # define beta schedule
 betas = linear_beta_schedule(timesteps=timesteps)
