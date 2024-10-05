@@ -20,4 +20,4 @@
 conda activate diffuse  # or `conda activate diffuse` depending on your conda setup
 
 # Run the Python script with command-line arguments
-python -m diffuse.ddpm --mode train --epochs 20 --batch_size 64 --learning_rate 0.0008 --ddpm_timesteps 10000 --cosine_warmup_steps 500 --cosine_total_training_steps 1000 --n 2
+python -m diffuseNew.main --mode train

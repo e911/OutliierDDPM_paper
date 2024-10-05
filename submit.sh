@@ -2,10 +2,10 @@
 
 job_file="job.sh"
 
-dir="out-big-viz"
+dir="out"
 mkdir -p $dir
 
-job_name="Sept-24"
+job_name="Oct-5"
 export job_name
 
 out_file=$dir/out_$job_name.out
