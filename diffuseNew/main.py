@@ -302,7 +302,7 @@ if __name__ == '__main__':
         'batch_size': args.batch_size,
         'learning_rate': args.learning_rate,
     #     'class_counts': {0: 5000, 1:10, 2: 4400, 3: 4000, 4: 4800, 5: 4400, 6: 4200, 7: 4000, 8: 4000, 9: 10},
-        'ddpm_scheduler_timestep': args.ddpm_timesteps,
+        'timesteps': args.ddpm_timesteps,
     #     'cosine_warmup_steps': args.cosine_warmup_steps,
     #     'cosine_warmup_training_steps': args.cosine_total_training_steps,
     #     'learning_rate': args.learning_rate,
