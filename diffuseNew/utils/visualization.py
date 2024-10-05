@@ -3,13 +3,19 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
-from PIL import Image
-import requests
-
-from diffuseNew.main import logger
 from diffuseNew.utils.sampling import sample
-from diffuseNew.utils.transforms import transform
 
+
+import logging
+
+logging.basicConfig(level=logging.INFO,  # Set the logging level
+                    format='%(asctime)s - %(levelname)s - %(message)s',  # Log format
+                    handlers=[
+                        logging.FileHandler("training.log"),  # Log to a file
+                        logging.StreamHandler()  # Also log to the console
+                    ])
+
+logger = logging.getLogger(__name__)
 
 def plot(imgs, original_image=None, with_orig=False, row_title=None, save_path=None, **imshow_kwargs):
     if not isinstance(imgs[0], list):

@@ -26,7 +26,7 @@ from diffuseNew.models.unet import *
 from diffuseNew.utils.lib import num_to_groups
 from diffuseNew.utils.sampling import sample
 from diffuseNew.utils.schedule import *
-from diffuseNew.utils.transforms import get_noisy_image, transform, transform_dataset
+from diffuseNew.utils.transforms import get_noisy_image, transform, transform_dataset, transforms_dataset
 from diffuseNew.utils.visualization import plot
 from datasets import load_dataset, Image, concatenate_datasets
 
@@ -60,12 +60,14 @@ def load_train_data(batch_size):
     train_dataset = load_dataset("mnist", split='train')
     class_samples = {0: 6000, 1: 6000, 2: 50, 3: 100, 4: 5500, 5: 5500, 6: 5500, 7: 5500, 8: 6000, 9: 6000}
     train_dataset = create_imbalanced_dataset(train_dataset, class_samples)
-    train_dataset.with_transform(transform_dataset)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     class_counts = {label: sum(1 for x in train_dataset['label'] if x == label) for label in range(10)}
     print("Class counts in the imbalanced dataset:")
     for label, count in class_counts.items():
         print(f"Class {label}: {count}")
+
+    transformed_dataset = train_dataset.with_transform(transforms_dataset)
+    train_loader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=False)
+
     return train_loader
 
 def load_test_data(batch_size):
@@ -88,8 +90,7 @@ def train():
     dataloader = load_train_data(batch_size)
 
     # Check a sample batch to ensure data format is correct
-    batch = next(iter(dataloader))
-    print(batch.keys())  # Should show 'pixel_values' and possibly 'labels'
+ # Should show 'pixel_values' and possibly 'labels'
 
     # Create a directory to save results and checkpoints
     results_folder = Path("./results")
@@ -128,7 +129,7 @@ def train():
             t = torch.randint(0, timesteps, (batch_size,), device=device).long()
 
             # Calculate loss
-            loss = p_losses(model, batch, t, loss_type="huber")
+            loss = p_losses(model, batch, t, loss_type="l2")
 
             # Print loss at every 100 steps
             if step % 100 == 0:
