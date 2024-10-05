@@ -4,8 +4,6 @@ from tqdm import tqdm
 from diffuseNew.utils.lib import *
 
 
-timesteps = 300
-
 @torch.no_grad()
 def p_sample(model, x, t, t_index):
     betas_t = extract(betas, t, x.shape)
@@ -46,3 +44,23 @@ def p_sample_loop(model, shape):
 @torch.no_grad()
 def sample(model, image_size, batch_size=16, channels=3):
     return p_sample_loop(model, shape=(batch_size, channels, image_size, image_size))
+
+
+@torch.no_grad()
+def denoise_image(model, noisy_image, timesteps=300):
+    """
+    Reconstructs a denoised image from a noisy image using the diffusion model.
+    model: the trained diffusion model
+    noisy_image: noisy input image
+    timesteps: number of timesteps for denoising
+    """
+    device = next(model.parameters()).device  # Ensure model and images are on the same device
+    noisy_image = noisy_image.to(device)
+    img = noisy_image.clone()
+
+    for i in reversed(range(0, timesteps)):
+        # Create a tensor of the current timestep for the batch
+        t = torch.full((noisy_image.size(0),), i, device=device, dtype=torch.long)
+        img = p_sample(model, img, t, t_index=i)  # Call your sampling function from sampling.py
+
+    return img

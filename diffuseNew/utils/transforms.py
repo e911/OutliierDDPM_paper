@@ -4,7 +4,7 @@ from torchvision import transforms
 from diffuseNew.utils.lib import *
 from torchvision.transforms import Compose, Lambda, ToPILImage, Resize, CenterCrop, ToTensor
 
-image_size = 128
+image_size = 64
 
 transform = Compose([
     Resize(image_size),
