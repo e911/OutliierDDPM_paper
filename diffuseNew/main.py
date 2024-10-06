@@ -276,7 +276,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Training Configuration for Diffusion Model')
     parser.add_argument('--mode', type=str, default='train', help='Train or Eval')
     parser.add_argument('--device', type=str, default='cuda', help='Device to use for training')
-    parser.add_argument('--epochs', type=int, default=20, help='Number of training epochs')
+    parser.add_argument('--epochs', type=int, default=10, help='Number of training epochs')
     parser.add_argument('--channels', type=int, default=1, help='Number of channels 1/3')
     parser.add_argument('--batch_size', type=int, default=64, help='Training batch size')
     parser.add_argument('--learning_rate', type=float, default=0.0004, help='Optimizer learning rate')
@@ -284,7 +284,7 @@ def parse_arguments():
     # parser.add_argument('--cosine_warmup_steps', type=int, default=500, help='Warmup steps for learning rate scheduler')
     # parser.add_argument('--cosine_total_training_steps', type=int, default=10000, help='Total training steps for learning rate scheduler')
     parser.add_argument('--n', type=int, default=1, help='Number of images per class')
-    parser.add_argument('--steps', type=int, default=1, help='Skip steps in saving image')
+    parser.add_argument('--steps', type=int, default=50, help='Skip steps in saving image')
     args = parser.parse_args()
     return args
 
