@@ -4,7 +4,7 @@ from tqdm import tqdm
 from diffuseNew.utils.lib import *
 from diffuseNew.utils.transforms import reverse_transform
 
-timesteps = 400
+timesteps = 300
 # define beta schedule
 betas = cosine_beta_schedule(timesteps=timesteps)
 
