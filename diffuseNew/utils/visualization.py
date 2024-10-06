@@ -106,7 +106,7 @@ def plot_denoise_steps(model, image, timesteps=1000, image_size=28, channels=1, 
     if not os.path.exists(training_dir):
         os.makedirs(training_dir)
         logger.info(f"Created sample directory at {training_dir}")
-    t = torch.tensor([timesteps - 1])
+    t = torch.tensor([40])
     noisy_image = q_sample(image_t, t)
     samples = denoise_image_loop(model, noisy_image, timesteps)
 
