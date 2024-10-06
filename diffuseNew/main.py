@@ -274,7 +274,7 @@ def noise_denoise_steps(config):
     checkpoint_path = checkpoint_folder / f"model_epoch_{epoch}.pth"
     model = load_model(checkpoint_path, image_size, channels)
     for each in images:
-        plot([q_sample(each, torch.tensor([t])) for t in [0, 50, 150, 200, timesteps]], each, True, save_path=f"{training_dir}/noise_{each['label']}.png")
+        plot([q_sample(each, torch.tensor([t])) for t in [0, 50, 150, 200, timesteps]], transform(each['image']).unsqueeze(0), True, save_path=f"{training_dir}/noise_{each['label']}.png")
         plot_denoise_steps(model, each, timesteps=timesteps, image_size=image_size, channels=channels, steps=steps)
 
 def parse_arguments():
