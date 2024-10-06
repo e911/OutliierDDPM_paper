@@ -26,7 +26,7 @@ def plot(imgs, image_size, channels, original_image=None, with_orig=False, row_t
 
     num_rows = len(imgs)
     num_cols = len(imgs[0]) + with_orig
-    fig, axs = plt.subplots(figsize=(20,20), nrows=num_rows, ncols=num_cols, squeeze=False)
+    fig, axs = plt.subplots(figsize=(150,50), nrows=num_rows, ncols=num_cols, squeeze=False)
     for row_idx, row in enumerate(imgs):
         row = [original_image] + row if with_orig else row
         for col_idx, img in enumerate(row):
