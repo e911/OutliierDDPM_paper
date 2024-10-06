@@ -62,7 +62,7 @@ def create_imbalanced_dataset(dataset, class_samples):
 
 def load_train_data(batch_size):
     train_dataset = load_dataset("mnist", split='train')
-    class_samples = {0: 6000, 1: 6000, 2: 50, 3: 100, 4: 5500, 5: 5500, 6: 5500, 7: 5500, 8: 6000, 9: 6000}
+    class_samples = {0: 6000, 1: 6000, 2: 6000, 3: 100, 4: 6000, 5: 6000, 6: 6000, 7: 6000, 8: 20, 9: 6000}
     train_dataset = create_imbalanced_dataset(train_dataset, class_samples)
     class_counts = {label: sum(1 for x in train_dataset['label'] if x == label) for label in range(10)}
     logger.info("Class counts in the imbalanced dataset:")
@@ -70,7 +70,7 @@ def load_train_data(batch_size):
         logger.info(f"Class {label}: {count}")
 
     transformed_dataset = train_dataset.with_transform(transforms_dataset)
-    train_loader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=True)
 
     return train_loader
 
@@ -85,7 +85,7 @@ def load_test_data(batch_size):
 
     transformed_dataset = test_dataset.with_transform(transforms_dataset)
 
-    test_loader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=True)
     return test_loader
 
 def train(config):
