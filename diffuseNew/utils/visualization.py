@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO,  # Set the logging level
 
 logger = logging.getLogger(__name__)
 
-def plot(imgs, original_image=None, with_orig=False, row_title=None, save_path=None, **imshow_kwargs):
+def plot(imgs, image_size, channels, original_image=None, with_orig=False, row_title=None, save_path=None, **imshow_kwargs):
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
         imgs = [imgs]
@@ -31,7 +31,7 @@ def plot(imgs, original_image=None, with_orig=False, row_title=None, save_path=N
         row = [original_image] + row if with_orig else row
         for col_idx, img in enumerate(row):
             ax = axs[row_idx, col_idx]
-            ax.imshow(np.asarray(img), **imshow_kwargs)
+            ax.imshow(img.reshape(image_size, image_size, channels), cmap="gray")
             ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
 
     if with_orig:

@@ -220,31 +220,31 @@ def eval_recon_loss(config):
     reconstruction_error_by_class(model, test_dataloader, device=device)
 
 
-def plot_noisy_image(timestep, image):
-    noisy_dir = f"./noisy_images"
-    if not os.path.exists(noisy_dir):
-        os.makedirs(noisy_dir)
-        logger.info(f"Created checkpoint directory at {noisy_dir}")
-
-    # url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
-    # image = Image.open(requests.get(url, stream=True).raw)  # PIL image of shape HWC
-    x_start = transform(image).unsqueeze(0)
-    print(x_start.shape)
-    t = torch.tensor([timestep])
-    a = get_noisy_image(x_start, t)
-    print(a)
-    plot([a,], image, save_path=f'{noisy_dir}/noisy_image.png')
-
-
-def plot_noisy_image_timesteps(image, step=15, timesteps=300):
-    checkpoint_dir = f"./noisy_images"
-    if not os.path.exists(checkpoint_dir):
-        os.makedirs(checkpoint_dir)
-        logger.info(f"Created checkpoint directory at {checkpoint_dir}")
-
-    x_start = transform(image).unsqueeze(0)
-    for timestep in range(0, timesteps + 1, step):
-        plot([get_noisy_image(x_start, torch.tensor([timestep]))], x_start, save_path=f'{checkpoint_dir}/noisy_image_{timestep}.png')
+# def plot_noisy_image(timestep, image):
+#     noisy_dir = f"./noisy_images"
+#     if not os.path.exists(noisy_dir):
+#         os.makedirs(noisy_dir)
+#         logger.info(f"Created checkpoint directory at {noisy_dir}")
+#
+#     # url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+#     # image = Image.open(requests.get(url, stream=True).raw)  # PIL image of shape HWC
+#     x_start = transform(image).unsqueeze(0)
+#     print(x_start.shape)
+#     t = torch.tensor([timestep])
+#     a = get_noisy_image(x_start, t)
+#     print(a)
+#     plot([a,], image, save_path=f'{noisy_dir}/noisy_image.png')
+#
+#
+# def plot_noisy_image_timesteps(image, step=15, timesteps=300):
+#     checkpoint_dir = f"./noisy_images"
+#     if not os.path.exists(checkpoint_dir):
+#         os.makedirs(checkpoint_dir)
+#         logger.info(f"Created checkpoint directory at {checkpoint_dir}")
+#
+#     x_start = transform(image).unsqueeze(0)
+#     for timestep in range(0, timesteps + 1, step):
+#         plot([get_noisy_image(x_start, torch.tensor([timestep]))], x_start, save_path=f'{checkpoint_dir}/noisy_image_{timestep}.png')
 
 def per_images(n):
   image = []
@@ -275,7 +275,7 @@ def noise_denoise_steps(config):
     model = load_model(checkpoint_path, image_size, channels)
     for each in images:
         img = transform(each['image']).unsqueeze(0)
-        plot([q_sample(img, torch.tensor([t])) for t in [0, 50, 150, 200, timesteps]], img, True, save_path=f"{training_dir}/noise_{each['label']}.png")
+        plot([q_sample(img, torch.tensor([t])) for t in [0, 50, 150, 200, timesteps]], image_size, channels, img, True, save_path=f"{training_dir}/noise_{each['label']}.png")
         plot_denoise_steps(model, each, timesteps=timesteps, image_size=image_size, channels=channels, steps=steps)
 
 def parse_arguments():
