@@ -100,7 +100,7 @@ def generate_sample(model, image_size, batch_size, channels, timesteps):
     plt.show()
 
 
-def plot_denoise_steps(model, image, timesteps=1000, image_size=28, channels=1, steps=50):
+def plot_denoise_steps(model, image, timesteps=300, image_size=28, channels=1, steps=50):
     image_t = transform(image['image']).unsqueeze(0)
     training_dir = f"./denosing_steps"
     if not os.path.exists(training_dir):
@@ -110,7 +110,7 @@ def plot_denoise_steps(model, image, timesteps=1000, image_size=28, channels=1, 
     noisy_image = q_sample(image_t, t)
     samples = denoise_image_loop(model, noisy_image, timesteps)
 
-    fig, axes = plt.subplots(1, int(timesteps / steps) + 1, figsize=(int(timesteps / steps) * 2 + 1, 2))
+    fig, axes = plt.subplots(1, int(timesteps / steps) + 2, figsize=(int(timesteps / steps) * 2 +2 , 2))
 
     # Remove spaces between the subplots
     plt.subplots_adjust(wspace=0, hspace=0)
@@ -118,12 +118,14 @@ def plot_denoise_steps(model, image, timesteps=1000, image_size=28, channels=1, 
     # Loop through each timestep and plot the corresponding image
     axes[0].imshow(image_t.reshape(image_size, image_size, channels), cmap="gray")
     axes[0].axis('off')  # Remove axis for a cleaner look
-
+    axes[1].imshow(noisy_image.reshape(image_size, image_size, channels), cmap="gray")
+    axes[1].axis('off')
     for i in range(timesteps):
         if i % steps == 0:
             step = int(i / steps)
-            axes[step + 1].imshow(samples[i].reshape(image_size, image_size, channels), cmap="gray")
-            axes[step + 1].axis('off')  # Remove axis for a cleaner look
+            axes[step + 2].imshow(samples[i].reshape(image_size, image_size, channels), cmap="gray")
+            axes[step + 2].axis('off')  # Remove axis for a cleaner look
+
 
     # Display the entire row of images
     plt.tight_layout(pad=0)

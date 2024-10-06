@@ -19,7 +19,7 @@ from torchvision.utils import save_image
 
 from diffuseNew.models.loss import p_losses, reconstruction_error_by_class
 from diffuseNew.models.unet import *
-from diffuseNew.utils.sampling import sample, get_noisy_image
+from diffuseNew.utils.sampling import sample, get_noisy_image, q_sample
 from diffuseNew.utils.schedule import *
 from diffuseNew.utils.transforms import transform, transform_dataset, transforms_dataset
 from diffuseNew.utils.visualization import plot, plot_denoise_steps
@@ -260,6 +260,10 @@ def per_images(n):
   return image
 
 def noise_denoise_steps(config):
+    training_dir = f"./denosing_steps"
+    if not os.path.exists(training_dir):
+        os.makedirs(training_dir)
+        logger.info(f"Created sample directory at {training_dir}")
     image_size = 28
     channels = config['channels']
     timesteps = config['timesteps']  # Number of diffusion timesteps
@@ -270,6 +274,7 @@ def noise_denoise_steps(config):
     checkpoint_path = checkpoint_folder / f"model_epoch_{epoch}.pth"
     model = load_model(checkpoint_path, image_size, channels)
     for each in images:
+        plot([q_sample(each, torch.tensor([t])) for t in [0, 50, 150, 200, timesteps]], each, True, save_path=f"{training_dir}/noise_{each['label']}.png")
         plot_denoise_steps(model, each, timesteps=timesteps, image_size=image_size, channels=channels, steps=steps)
 
 def parse_arguments():
@@ -280,7 +285,7 @@ def parse_arguments():
     parser.add_argument('--channels', type=int, default=1, help='Number of channels 1/3')
     parser.add_argument('--batch_size', type=int, default=64, help='Training batch size')
     parser.add_argument('--learning_rate', type=float, default=0.0004, help='Optimizer learning rate')
-    parser.add_argument('--ddpm_timesteps', type=int, default=1000, help='Number of DDPM timesteps')
+    parser.add_argument('--ddpm_timesteps', type=int, default=400, help='Number of DDPM timesteps')
     # parser.add_argument('--cosine_warmup_steps', type=int, default=500, help='Warmup steps for learning rate scheduler')
     # parser.add_argument('--cosine_total_training_steps', type=int, default=10000, help='Total training steps for learning rate scheduler')
     parser.add_argument('--n', type=int, default=1, help='Number of images per class')
