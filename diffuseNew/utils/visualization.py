@@ -127,5 +127,4 @@ def plot_denoise_steps(model, image, timesteps=1000, image_size=28, channels=1, 
 
     # Display the entire row of images
     plt.tight_layout(pad=0)
-    plt.savefig(f'{training_dir}/train.png')  # Ensure no padding around the images
-    plt.show()
+    plt.savefig(f"{training_dir}/train_{image['label']}.png")  # Ensure no padding around the images
